@@ -1,4 +1,8 @@
 #include <iostream>
+#include <fstream>
+#include <string>
+#include <stdlib.h>
+
 using namespace std;
 
 
@@ -142,35 +146,71 @@ void output(int* poly1, int size1,int* poly2, int size2)    //args: each array a
 
 int main()
 {
-    //taking in first poly
-    unsigned int size1;
-    cout << "Order of first polynomial: ";
-    cin >>  size1;
-    cin.ignore();
-    size1+=2;
-    cout << "Enter Polynomial: ";
+    int choice;
+    int size1;
+    int size2;
+    int *arr1, *arr2;
 
-    int *arr1 = new int[size1];
-    for(int i = 0; i < size1; ++i)
+    cout << "Would you like to take input from demo.txt[0] or Standard input[1]?\n-> ";
+    cin >> choice;
+    if(choice == 0)
     {
-        cin >> arr1[i];
+        ifstream readfile("demo.txt");
+        readfile >> size1;
+        size1+=2;
+        arr1 = new int[size1];
+
+        for(int i = 0; i < size1; ++i)
+    {
+        readfile >> arr1[i];
     }
 
-
-    //Taking in 2nd poly
-    int size2;
-    cout << "\nOrder of second polynomial: ";
-    cin >>  size2;
-    cin.ignore();
+    readfile >> size2;
     size2+=2;
-    cout << "Enter Polynomial: ";
 
-    int *arr2 = new int[size2];
+    arr2 = new int[size2];
     for(int i = 0; i < size2; ++i)
     {
-        cin >> arr2[i];
+        
+        readfile >> arr2[i];
+    }
     }
 
+    else if (choice == 1)
+    {
+        cout << "Order of first polynomial: ";
+        cin >>  size1;
+        cin.ignore();
+        size1+=2;
+        cout << "Enter Polynomial: ";
+    
+        arr1 = new int[size1];
+        for(int i = 0; i < size1; ++i)
+        {
+            cin >> arr1[i];
+        }
+    
+    
+        //Taking in 2nd poly
+        
+        cout << "\nOrder of second polynomial: ";
+        cin >>  size2;
+        cin.ignore();
+        size2+=2;
+        cout << "Enter Polynomial: ";
+    
+        arr2 = new int[size2];
+        for(int i = 0; i < size2; ++i)
+        {
+            cin >> arr2[i];
+        }
+    }
+
+    else 
+        cout << "Error: wrong choice, please try again...";
+
+
+  
     cout << "\n\n\n";
     output(arr1, size1, arr2, size2);      //I need to remember to not overcomplicate array pointer
 
