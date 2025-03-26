@@ -155,7 +155,10 @@ int main()
     cin >> choice;
     if(choice == 0)
     {
-        ifstream readfile("demo.txt");
+        string fname;
+        cout << "Enter file name: ";
+        cin>>fname;
+        ifstream readfile(fname);
         readfile >> size1;
         size1+=2;
         arr1 = new int[size1];
