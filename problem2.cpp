@@ -133,7 +133,8 @@ void output(int* poly1, int size1,int* poly2, int size2)    //args: each array a
         }
         else if(i >= size2)
         {
-            subArr[i] = poly1[i];           //deal with negatives in subtraction
+            subArr[i] = poly1[i];
+            subArr[i] *= -1;           //deal with negatives in subtraction
         }
     }
 
@@ -151,7 +152,7 @@ int main()
     int size2;
     int *arr1, *arr2;
 
-    cout << "Would you like to take input from demo.txt[0] or Standard input[1]?\n-> ";
+    cout << "Would you like to take input from File[0] or Standard input[1]?\n-> ";
     cin >> choice;
     if(choice == 0)
     {
