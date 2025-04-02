@@ -1,20 +1,22 @@
 
 #include <iostream>
 #include<chrono>
-#include<vector>
+#include<cstring>
 #include<algorithm>
 #include<string>
+#include <fstream> 
+#include <sstream> 
 #include<type_traits>
 using namespace std;
-//Problem 4
 template <typename T>
 class SortingSystem {
 private:
     bool First = true;
     int iter = 0;
     T* data;
+    T*Temp;
     int size;
-
+    void ReadDataFromFile(const string& filename, int testCaseNumber);
 public:
     SortingSystem(int n);
     ~SortingSystem();
@@ -33,28 +35,49 @@ public:
     void QuickPointer();
     void displayData();
     void measureSortTime(void (SortingSystem::* sortFunc)());
-
     void showMenu();
 };
-
+template <typename T>
+void SortingSystem<T>::ReadDataFromFile(const string& filename, int testCaseNumber) {
+    ifstream file(filename);
+    if (!file.is_open()) {
+        cout << "Error opening file. Try again.\n";
+        return;
+    }
+    string line;
+    for (int i = 0; i < testCaseNumber; i++) {
+        if (!getline(file, line)) {
+            cout << "Error: Not enough test cases in the file.\n";
+            return;
+        }
+    }
+    istringstream iss(line);
+    iss >> size;
+    data = new T[size];
+	Temp = new T[size];
+    for (int i = 0; i < size; i++) {
+        iss >> data[i];
+		Temp[i] = data[i];
+    }
+    file.close();
+}
 template <typename T>
 SortingSystem<T>::SortingSystem(int n) {
     this->size = n;
     this->data = new T[size];
+	this->Temp = new T[size];
 }
-
 template <typename T>
 SortingSystem<T>::~SortingSystem() {
     cout << "\nEnding of the programm(:\n";
+	delete[] data;
+	delete[] Temp;
 }
-
 template <typename T>
 void SortingSystem<T>::insertionSort() {
-   
     cout << "Sorting using Insertion Sort...\n";
     cout << "Initial Data: ";
     displayData();
-    int iter = 0;
     for (int i = 1; i < size; i++) {
         T temp = data[i];
         int j = i - 1;
@@ -69,10 +92,8 @@ void SortingSystem<T>::insertionSort() {
     }
    
 }
-
 template <typename T>
 void SortingSystem<T>::selectionSort() {
- 
     cout << "Sorting using Selection Sort...\n";
     cout << "Initial Data: ";
     displayData();
@@ -86,18 +107,16 @@ void SortingSystem<T>::selectionSort() {
         if (minIndex != i) {
             swap(data[i], data[minIndex]);
         }
-        cout << "Iteration " << i + 1 << ": ";
+        cout << "Iteration " << iter + 1 << ": ";
         displayData();
+		iter++;
     }  
 }
-
 template <typename T>
 void SortingSystem<T>::bubbleSort() {
-  
     cout << "Sorting using Bubble Sort...\n";
     cout << "Initial Data: ";
     displayData();
-    int iter = 0;
     for (int i = 0; i < size - 1; i++) {
         for (int j = size - 1; j > i; j--)
             if (data[j - 1] > data[j])
@@ -108,14 +127,11 @@ void SortingSystem<T>::bubbleSort() {
     }
   
 }
-
 template <typename T>
 void SortingSystem<T>::shellSort() {
- 
     cout << "Sorting using Shell Sort...\n";
     cout << "Initial Data: ";
     displayData();
-    int iter = 0;
     for (int gap = size / 2; gap > 0; gap /= 2) {
         for (int i = gap; i < size; i++) {
             T temp = data[i];
@@ -154,7 +170,6 @@ template <typename T>
 void SortingSystem<T>::MergePointer() {
     mergeSort(0, size - 1);
 }
-
 template <typename T>
 void SortingSystem<T>::quickSort(int left, int right) {
     if (First) {
@@ -236,7 +251,7 @@ void SortingSystem<int>::radixSort() {
         }
     }
     for (int exp = 1; max / exp > 0; exp *= 10) {
-        vector<int> output(size);
+		int *output = new int[size];
         int count[10] = { 0 };
         for (int i = 0; i < size; i++) count[(data[i] / exp) % 10]++;
         cout << "The 1st C data: [";
@@ -263,11 +278,6 @@ void SortingSystem<int>::radixSort() {
         displayData();
     }   
 }
-template <typename T>
-void SortingSystem<T>::bucketSort() {
-    cout << "Bucket sort is NOT supported for this type.\n";
-}
-// Specialization for int
 template <>
 void SortingSystem<int>::bucketSort() {
     cout << "Sorting using Bucket Sort (int)..." << "\n";
@@ -275,36 +285,52 @@ void SortingSystem<int>::bucketSort() {
     displayData();
 
     int bucketCount = 10;
-    vector<int> Temp(data, data + size);
-    vector<vector<int>> buckets(bucketCount);
-    int maxVal = *max_element(Temp.begin(), Temp.end());
+    int maxVal = *max_element(data, data + size);
 
-    for (int num : Temp) {
-        int bucketIndex = ((num * bucketCount) / (maxVal + 1));
-        buckets[bucketIndex].push_back(num);
+    int** buckets = new int* [bucketCount];
+    int* bucketSizes = new int[bucketCount] {0};
+    for (int i = 0; i < bucketCount; i++) {
+        buckets[i] = new int[size];
     }
+
+    for (int i = 0; i < size; i++) {
+        int bucketIndex = (data[i] * bucketCount) / (maxVal + 1);
+        buckets[bucketIndex][bucketSizes[bucketIndex]++] = data[i];
+    }
+
     cout << "Current buckets:\n";
     for (int i = 0; i < bucketCount; i++) {
         cout << "Bucket " << i << ": [";
-        for (size_t j = 0; j < buckets[i].size(); j++) {
+        for (int j = 0; j < bucketSizes[i]; j++) {
             cout << buckets[i][j];
-            if (j < buckets[i].size() - 1)
+            if (j < bucketSizes[i] - 1)
                 cout << ", ";
         }
         cout << "]\n";
     }
+   
 
-    Temp.clear();
-    for (auto& bucket : buckets) {
-        sort(bucket.begin(), bucket.end());
-        Temp.insert(Temp.end(), bucket.begin(), bucket.end());
+    int index = 0;
+    for (int i = 0; i < bucketCount; i++) {
+    
+        for (int j = 1; j < bucketSizes[i]; j++) {
+            int key = buckets[i][j];
+            int k = j - 1;
+            while (k >= 0 && buckets[i][k] > key) {
+                buckets[i][k + 1] = buckets[i][k];
+                k--;
+            }
+            buckets[i][k + 1] = key;
+        }
+
+        for (int j = 0; j < bucketSizes[i]; j++) {
+            data[index++] = buckets[i][j];
+        }
+        delete[] buckets[i];
     }
-    for (int i = 0; i < size; i++) {
-        data[i] = Temp[i];
-    }
+    delete[] buckets;
+    delete[] bucketSizes;
 }
-
-// Specialization for float
 template <>
 void SortingSystem<float>::bucketSort() {
     cout << "Sorting using Bucket Sort (float)..." << "\n";
@@ -312,37 +338,50 @@ void SortingSystem<float>::bucketSort() {
     displayData();
 
     int bucketCount = 10;
-    vector<float> Temp(data, data + size);
-    vector<vector<float>> buckets(bucketCount);
-    float maxVal = *max_element(Temp.begin(), Temp.end());
+    float maxVal = *max_element(data, data + size);
 
-    for (float num : Temp) {
-        // For floats, we assume numbers are non-negative.
-        int bucketIndex = static_cast<int>((num * bucketCount) / (maxVal + 1.0f));
-        buckets[bucketIndex].push_back(num);
+    float** buckets = new float* [bucketCount];
+    int* bucketSizes = new int[bucketCount] {0};
+    for (int i = 0; i < bucketCount; i++) {
+        buckets[i] = new float[size];
     }
+
+    for (int i = 0; i < size; i++) {
+        int bucketIndex = static_cast<int>((data[i] * bucketCount) / (maxVal + 1.0f));
+        buckets[bucketIndex][bucketSizes[bucketIndex]++] = data[i];
+    }
+
     cout << "Current buckets:\n";
     for (int i = 0; i < bucketCount; i++) {
         cout << "Bucket " << i << ": [";
-        for (size_t j = 0; j < buckets[i].size(); j++) {
+        for (int j = 0; j < bucketSizes[i]; j++) {
             cout << buckets[i][j];
-            if (j < buckets[i].size() - 1)
+            if (j < bucketSizes[i] - 1)
                 cout << ", ";
         }
         cout << "]\n";
     }
 
-    Temp.clear();
-    for (auto& bucket : buckets) {
-        sort(bucket.begin(), bucket.end());
-        Temp.insert(Temp.end(), bucket.begin(), bucket.end());
-    }
-    for (int i = 0; i < size; i++) {
-        data[i] = Temp[i];
-    }
-}
+    int index = 0;
+    for (int i = 0; i < bucketCount; i++) {
+        for (int j = 1; j < bucketSizes[i]; j++) {
+            float key = buckets[i][j];
+            int k = j - 1;
+            while (k >= 0 && buckets[i][k] > key) {
+                buckets[i][k + 1] = buckets[i][k];
+                k--;
+            }
+            buckets[i][k + 1] = key;
+        }
 
-// Specialization for double
+        for (int j = 0; j < bucketSizes[i]; j++) {
+            data[index++] = buckets[i][j];
+        }
+        delete[] buckets[i];
+    }
+    delete[] buckets;
+    delete[] bucketSizes;
+}
 template <>
 void SortingSystem<double>::bucketSort() {
     cout << "Sorting using Bucket Sort (double)..." << "\n";
@@ -350,36 +389,142 @@ void SortingSystem<double>::bucketSort() {
     displayData();
 
     int bucketCount = 10;
-    vector<double> Temp(data, data + size);
-    vector<vector<double>> buckets(bucketCount);
-    double maxVal = *max_element(Temp.begin(), Temp.end());
+    double maxVal = *max_element(data, data + size);
 
-    for (double num : Temp) {
-        // For doubles, we assume numbers are non-negative.
-        int bucketIndex = static_cast<int>((num * bucketCount) / (maxVal + 1.0));
-        buckets[bucketIndex].push_back(num);
+    double** buckets = new double* [bucketCount];
+    int* bucketSizes = new int[bucketCount] {0};
+    for (int i = 0; i < bucketCount; i++) {
+        buckets[i] = new double[size];
     }
+
+    for (int i = 0; i < size; i++) {
+        int bucketIndex = static_cast<int>((data[i] * bucketCount) / (maxVal + 1.0));
+        buckets[bucketIndex][bucketSizes[bucketIndex]++] = data[i];
+    }
+
     cout << "Current buckets:\n";
     for (int i = 0; i < bucketCount; i++) {
         cout << "Bucket " << i << ": [";
-        for (size_t j = 0; j < buckets[i].size(); j++) {
+        for (int j = 0; j < bucketSizes[i]; j++) {
             cout << buckets[i][j];
-            if (j < buckets[i].size() - 1)
+            if (j < bucketSizes[i] - 1)
                 cout << ", ";
         }
         cout << "]\n";
     }
 
-    Temp.clear();
-    for (auto& bucket : buckets) {
-        sort(bucket.begin(), bucket.end());
-        Temp.insert(Temp.end(), bucket.begin(), bucket.end());
-    }
-    for (int i = 0; i < size; i++) {
-        data[i] = Temp[i];
-    }
-}
+    int index = 0;
+    for (int i = 0; i < bucketCount; i++) {
+        for (int j = 1; j < bucketSizes[i]; j++) {
+            double key = buckets[i][j];
+            int k = j - 1;
+            while (k >= 0 && buckets[i][k] > key) {
+                buckets[i][k + 1] = buckets[i][k];
+                k--;
+            }
+            buckets[i][k + 1] = key;
+        }
 
+        for (int j = 0; j < bucketSizes[i]; j++) {
+            data[index++] = buckets[i][j];
+        }
+        delete[] buckets[i];
+    }
+    delete[] buckets;
+    delete[] bucketSizes;
+}
+template <>
+void SortingSystem<char>::bucketSort() {
+    cout << "Sorting using Bucket Sort (char)..." << "\n";
+    cout << "Initial Data: ";
+    displayData();
+
+    int bucketCount = 128; 
+    char** buckets = new char* [bucketCount];
+    int* bucketSizes = new int[bucketCount] {0};
+
+    for (int i = 0; i < bucketCount; i++)
+        buckets[i] = new char[size];
+
+    for (int i = 0; i < size; i++) {
+        int bucketIndex = static_cast<int>(data[i]);
+        buckets[bucketIndex][bucketSizes[bucketIndex]++] = data[i];
+    }
+
+    cout << "Current buckets:\n";
+    for (int i = 0; i < bucketCount; i++) {
+        if (bucketSizes[i] > 0) {
+            cout << "Bucket " << char(i) << ": [";
+            for (int j = 0; j < bucketSizes[i]; j++) {
+                cout << buckets[i][j] << (j < bucketSizes[i] - 1 ? ", " : "");
+            }
+            cout << "]\n";
+        }
+    }
+
+    int index = 0;
+    for (int i = 0; i < bucketCount; i++) {
+        for (int j = 0; j < bucketSizes[i]; j++) {
+            data[index++] = buckets[i][j];
+        }
+        delete[] buckets[i];
+    }
+
+    delete[] buckets;
+    delete[] bucketSizes;
+}
+template <>
+void SortingSystem<string>::bucketSort() {
+    cout << "Sorting using Bucket Sort (string)..." << "\n";
+    cout << "Initial Data: ";
+    displayData();
+
+    int bucketCount = 26;
+    string** buckets = new string * [bucketCount];
+    int* bucketSizes = new int[bucketCount] {0};
+
+    for (int i = 0; i < bucketCount; i++)
+        buckets[i] = new string[size];
+
+    for (int i = 0; i < size; i++) {
+        int bucketIndex = tolower(data[i][0]) - 'a';
+        if (bucketIndex >= 0 && bucketIndex < 26) {
+            buckets[bucketIndex][bucketSizes[bucketIndex]++] = data[i];
+        }
+    }
+
+    cout << "Current buckets:\n";
+    for (int i = 0; i < bucketCount; i++) {
+        if (bucketSizes[i] > 0) {
+            cout << "Bucket " << char('a' + i) << ": [";
+            for (int j = 0; j < bucketSizes[i]; j++) {
+                cout << buckets[i][j] << (j < bucketSizes[i] - 1 ? ", " : "");
+            }
+            cout << "]\n";
+        }
+    }
+
+    int index = 0;
+    for (int i = 0; i < bucketCount; i++) {
+        for (int j = 1; j < bucketSizes[i]; j++) {
+            string key = buckets[i][j];
+            int k = j - 1;
+            while (k >= 0 && buckets[i][k] > key) {
+                buckets[i][k + 1] = buckets[i][k];
+                k--;
+            }
+            buckets[i][k + 1] = key;
+        }
+
+        for (int j = 0; j < bucketSizes[i]; j++) {
+            data[index++] = buckets[i][j];
+        }
+        delete[] buckets[i];
+    }
+
+    delete[] buckets;
+    delete[] bucketSizes;
+}
 template <typename T>
 void SortingSystem<T>::merge(int left, int mid, int right) {
     int n1 = mid - left + 1;
@@ -430,7 +575,6 @@ void SortingSystem<T>::merge(int left, int mid, int right) {
     delete[] L;
     delete[] R;
 }
-
 template <typename T>
 int SortingSystem<T>::partition(int low, int high) {
     T pivot = data[high];
@@ -454,7 +598,6 @@ int SortingSystem<T>::partition(int low, int high) {
     return i + 1;
     
 }
-
 template <typename T>
 void SortingSystem<T>::displayData() {
     cout << "[";
@@ -464,7 +607,6 @@ void SortingSystem<T>::displayData() {
     }
     cout << "]\n";
 }
-
 template <typename T>
 void SortingSystem<T>::measureSortTime(void (SortingSystem::* sortFunc)()) {
     auto start = chrono::high_resolution_clock::now();
@@ -475,20 +617,15 @@ void SortingSystem<T>::measureSortTime(void (SortingSystem::* sortFunc)()) {
     auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
     cout << "Sorting Time: " << duration.count() / 1000000.0 << " seconds\n";
 }
-
 template <typename T>
 void SortingSystem<T>::showMenu() {
-    vector<T> Temp(size);
-
-    // Gather input
-    for (int i = 0; i < size; i++) {
-        cout << "Enter data " << i + 1 << ": ";
-        cin >> data[i];
-        Temp[i] = data[i];
-    }
-
+    ReadDataFromFile("Problem4.txt", size);
+	cout << "Sorting System\n";
+	cout << "----------------\n";
     int choice;
     do {
+        cout << "\nInitial Data: ";
+        displayData();
         cout << "\nSelect a sorting algorithm:\n";
         cout << "1. Insertion Sort\n";
         cout << "2. Selection Sort\n";
@@ -496,8 +633,6 @@ void SortingSystem<T>::showMenu() {
         cout << "4. Shell Sort\n";
         cout << "5. Merge Sort\n";
         cout << "6. Quick Sort\n";
-
-        // Only show valid Count/ Radix for int:
         if constexpr (std::is_same_v<T, int>) {
             cout << "7. Count Sort\n";
             cout << "8. Radix Sort\n";
@@ -506,11 +641,9 @@ void SortingSystem<T>::showMenu() {
             cout << "7. Count Sort (N/A for this type)\n";
             cout << "8. Radix Sort (N/A for this type)\n";
         }
-
         cout << "9. Bucket Sort\n";
         cout << "Enter your choice (1-9): ";
         cin >> choice;
-
         switch (choice) {
         case 1:
             measureSortTime(&SortingSystem::insertionSort);
@@ -556,7 +689,7 @@ void SortingSystem<T>::showMenu() {
         default:
             cout << "Invalid choice. Try again.\n";
         }
-
+		iter = 0;
         cout << "\nDo you want to sort another dataset? (y/n): ";
         char repeat;
         cin >> repeat;
@@ -564,48 +697,41 @@ void SortingSystem<T>::showMenu() {
             cout << "Thank you for using the sorting system! Goodbye!\n";
             break;
         }
-
-        // Reset data to original for next iteration
         for (int i = 0; i < size; i++) {
             data[i] = Temp[i];
         }
 
     } while (true);
 }
-
-
-
 int main()
 {
-    int size;
-    cout << "Enter the number of items to sort: ";
-    cin >> size;
-    cout << "the type of the Items:\n1. Integer\n2. Float\n3. Double\n4. Char\n5. String";
-    cout << "Enter the type of the array:  ";
-    string type;
-    cin >> type;
-	if (type == "1") {
-		SortingSystem<int> sortingSystem(size);
-		sortingSystem.showMenu();
-	}
-	else if (type == "2") {
-		SortingSystem<float> sortingSystem(size);
-		sortingSystem.showMenu();
-	}
-	else if (type == "3") {
-		SortingSystem<double> sortingSystem(size);
-		sortingSystem.showMenu();
-	}
-	else if (type == "4") {
-		SortingSystem<char> sortingSystem(size);
-		sortingSystem.showMenu();
-	}
-	else if (type == "5") {
-		SortingSystem<string> sortingSystem(size);
-		sortingSystem.showMenu();
-	}
-	else {
-		cout << "Invalid type\n";
-	}
+       string type;
+        cout << "the type of the Items:\n1. Integer\n2. Float\n3. Double\n4. Char\n5. String\n";
+        cout << "Enter the type of the array:  ";
+        cin >> type;
+        if (type == "1") {
+            SortingSystem<int> sortingSystem(1);
+            sortingSystem.showMenu();
+        }
+        else if (type == "2") {
+            SortingSystem<float> sortingSystem(2);
+            sortingSystem.showMenu();
+        }
+        else if (type == "3") {
+            SortingSystem<double> sortingSystem(3);
+            sortingSystem.showMenu();
+        }
+        else if (type == "4") {
+            SortingSystem<char> sortingSystem(4);
+            sortingSystem.showMenu();
+        }
+        else if (type == "5") {
+            SortingSystem<string> sortingSystem(5);
+            sortingSystem.showMenu();
+        }
+        else {
+            cout << "Invalid type\n";
+        }
+    
     
 } 
