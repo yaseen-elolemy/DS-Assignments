@@ -230,6 +230,7 @@ int main()
             cin >> arr2[i];
         }
 
+        cout << endl << endl;
         output(arr1, size1, arr2, size2);
 
         delete[] arr1;
