@@ -151,12 +151,6 @@ void output(int* poly1, int size1,int* poly2, int size2)    //args: each array a
 
 int main()
 {
-    int choice;
-    cout << "Would you like to take input from File[0] or Standard input[1]?\n-> ";
-    cin >> choice;
-
-    if (choice == 0)
-    {
         string fname;
         cout << "Enter file name: ";
         cin >> fname;
@@ -202,44 +196,8 @@ int main()
         }
 
         readfile.close();
-    }
-    else if (choice == 1)
-    {
-        int size1, size2;
-        int *arr1, *arr2;
-
-        cout << "Order of first polynomial: ";
-        cin >> size1;
-        cin.ignore();
-        size1 += 2;
-        cout << "Enter Polynomial: ";
-        arr1 = new int[size1];
-        for (int i = 0; i < size1; ++i)
-        {
-            cin >> arr1[i];
-        }
-
-        cout << "\nOrder of second polynomial: ";
-        cin >> size2;
-        cin.ignore();
-        size2 += 2;
-        cout << "Enter Polynomial: ";
-        arr2 = new int[size2];
-        for (int i = 0; i < size2; ++i)
-        {
-            cin >> arr2[i];
-        }
-
-        cout << endl << endl;
-        output(arr1, size1, arr2, size2);
-
-        delete[] arr1;
-        delete[] arr2;
-    }
-    else
-    {
-        cout << "Error: wrong choice, please try again...";
-    }
+    
+  
 
     return 0;
 }
