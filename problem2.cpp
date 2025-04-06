@@ -20,7 +20,7 @@ void printer(int *poly1, int size1) //utilizing function overloading
         
             i1--;
     }
-    if(i1 = 2)
+    if(i1 == 2)
     {
         if(poly1[i1] == 0 && poly1[i1-1])
             cout << poly1[i1 - 1] << " = " << poly1[0];
@@ -52,7 +52,7 @@ void printer(int* poly1, int size1,int* poly2, int size2)
         
             i1--;
     }
-    if(i1 = 2)
+    if(i1 == 2)
     {
         if(poly1[i1] == 0 && poly1[i1-1])
             cout << poly1[i1 - 1] << " = " << poly1[0];
@@ -79,7 +79,7 @@ void printer(int* poly1, int size1,int* poly2, int size2)
         
         i2--;
     }
-    if(i2 = 2)
+    if(i2 == 2)
     {
         if(poly2[i2] == 0 && poly2[i2-1])
             cout << poly2[i2 - 1] << " = " << poly2[0];
@@ -152,79 +152,93 @@ void output(int* poly1, int size1,int* poly2, int size2)    //args: each array a
 int main()
 {
     int choice;
-    int size1;
-    int size2;
-    int *arr1, *arr2;
-
     cout << "Would you like to take input from File[0] or Standard input[1]?\n-> ";
     cin >> choice;
-    if(choice == 0)
+
+    if (choice == 0)
     {
         string fname;
         cout << "Enter file name: ";
-        cin>>fname;
+        cin >> fname;
         ifstream readfile(fname);
-        readfile >> size1;
-        size1+=2;
-        arr1 = new int[size1];
 
-        for(int i = 0; i < size1; ++i)
-    {
-        readfile >> arr1[i];
+        if (!readfile.is_open())
+        {
+            cout << "Error: Could not open file.\n";
+            return 1;
+        }
+
+        int testCases;
+        readfile >> testCases; // Read the number of test cases
+
+        for (int t = 0; t < testCases; ++t)
+        {
+            int size1, size2;
+            int *arr1, *arr2;
+
+            // Read first polynomial
+            readfile >> size1;
+            size1 += 2;
+            arr1 = new int[size1];
+            for (int i = 0; i < size1; ++i)
+            {
+                readfile >> arr1[i];
+            }
+
+            // Read second polynomial
+            readfile >> size2;
+            size2 += 2;
+            arr2 = new int[size2];
+            for (int i = 0; i < size2; ++i)
+            {
+                readfile >> arr2[i];
+            }
+
+            cout << "\nTest Case #" << t + 1 << ":\n";
+            output(arr1, size1, arr2, size2);
+
+            delete[] arr1;
+            delete[] arr2;
+        }
+
+        readfile.close();
     }
-
-    readfile >> size2;
-    size2+=2;
-
-    arr2 = new int[size2];
-    for(int i = 0; i < size2; ++i)
-    {
-        
-        readfile >> arr2[i];
-    }
-    }
-
     else if (choice == 1)
     {
+        int size1, size2;
+        int *arr1, *arr2;
+
         cout << "Order of first polynomial: ";
-        cin >>  size1;
+        cin >> size1;
         cin.ignore();
-        size1+=2;
+        size1 += 2;
         cout << "Enter Polynomial: ";
-    
         arr1 = new int[size1];
-        for(int i = 0; i < size1; ++i)
+        for (int i = 0; i < size1; ++i)
         {
             cin >> arr1[i];
         }
-    
-    
-        //Taking in 2nd poly
-        
+
         cout << "\nOrder of second polynomial: ";
-        cin >>  size2;
+        cin >> size2;
         cin.ignore();
-        size2+=2;
+        size2 += 2;
         cout << "Enter Polynomial: ";
-    
         arr2 = new int[size2];
-        for(int i = 0; i < size2; ++i)
+        for (int i = 0; i < size2; ++i)
         {
             cin >> arr2[i];
         }
+
+        output(arr1, size1, arr2, size2);
+
+        delete[] arr1;
+        delete[] arr2;
+    }
+    else
+    {
+        cout << "Error: wrong choice, please try again...";
     }
 
-    else 
-        cout << "Error: wrong choice, please try again...";
-
-
-  
-    cout << "\n\n\n";
-    output(arr1, size1, arr2, size2);      //I need to remember to not overcomplicate array pointer
-
-
-
-    delete[] arr1; delete[] arr2;
     return 0;
-
 }
