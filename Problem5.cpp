@@ -1,23 +1,6 @@
 #include <iostream>
-#include <type_traits>
-using namespace std;
-
-template <typename T>
-string type(T) {
-    return "Unknown";
-}
-
-template <typename T>
-class StatisticalCalculation {
-    
-private:
-    T* data;
-    int size;
-
-public:#include <iostream>
 #include<fstream>
 #include<string>
-#include <sstream>
 #include <sstream>
 using namespace std;
 
