@@ -67,7 +67,7 @@ public:
             guest_list[size] = guest;
             size++;
         } else {
-            cout << "Error: Guest list is full. Cannot add more guests." << endl;
+            cout << "Error: Guest list is full" << endl;
             delete guest;
         }
     }
